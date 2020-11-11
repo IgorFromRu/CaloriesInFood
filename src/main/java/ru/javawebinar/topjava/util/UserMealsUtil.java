@@ -40,7 +40,7 @@ public class UserMealsUtil {
         // переформатируем UserMeal в UserMealWitchExcess, добавляем в лист userMealWithExcessList
         final List<UserMealWithExcess> userMealWithExcessList = new ArrayList<>();
         meals.forEach(meal -> {
-            if(meal.getDateTime().toLocalTime().isAfter(startTime) && meal.getDateTime().toLocalTime().isBefore(endTime)){
+            if (meal.getDateTime().toLocalTime().isAfter(startTime) && meal.getDateTime().toLocalTime().isBefore(endTime)) {
                 userMealWithExcessList.add(new UserMealWithExcess(meal.getDateTime(), meal.getDescription(), meal.getCalories(),
                         contCalories.get(meal.getDateTime().toLocalDate()) > caloriesPerDay));
             }
