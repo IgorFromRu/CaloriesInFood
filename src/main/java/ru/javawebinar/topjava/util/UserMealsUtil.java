@@ -30,11 +30,8 @@ public class UserMealsUtil {
 
     public static List<UserMealWithExcess> filteredByCycles(List<UserMeal> meals, LocalTime startTime, LocalTime endTime, int caloriesPerDay) {
         // TODO return filtered list with excess. Implement by cycles
-
-        List<UserMealWithExcess> userMealWithExcessList = new ArrayList<>(); // вся еда с полем избытка
-        Map<LocalDate, Integer> contCalories = new HashMap<>(); // дата и количество калорий за день
-        List<UserMealWithExcess> userForReturn = new ArrayList<>(); // лист для возврата
-
+        // дата и количество калорий за день
+        Map<LocalDate, Integer> contCalories = new HashMap<>();
         // добавить в Map по ключу даты по значению плюсуем калории
         for (UserMeal userMeal : meals) {
             if (contCalories.containsKey(userMeal.getDateTime().toLocalDate())) {
@@ -44,23 +41,21 @@ public class UserMealsUtil {
                 contCalories.put(userMeal.getDateTime().toLocalDate(), userMeal.getCalories());
             }
         }
+        // вся еда между указанным временем с полем избытка
+        List<UserMealWithExcess> userMealWithExcessList = new ArrayList<>();
         // переформатируем UserMeal в UserMealWitchExcess, добавляем в лист userMealWithExcessList
         for (Map.Entry<LocalDate, Integer> entry : contCalories.entrySet()) {
             for (UserMeal meal : meals) {
-                if (entry.getKey().equals(meal.getDateTime().toLocalDate())) {
+                if (entry.getKey().equals(meal.getDateTime().toLocalDate())
+                        && meal.getDateTime().toLocalTime().isAfter(startTime)
+                        && meal.getDateTime().toLocalTime().isBefore(endTime) ) {
                     boolean excess = false;
                     if (entry.getValue() > caloriesPerDay) excess = true;
                     userMealWithExcessList.add(new UserMealWithExcess(meal.getDateTime(), meal.getDescription(), meal.getCalories(), excess));
                 }
             }
         }
-        // сортируем userMealWithExcessList по входящему времени и записываем userForReturn
-        for (UserMealWithExcess user : userMealWithExcessList) {
-            if (user.getDateTime().toLocalTime().isAfter(startTime) && user.getDateTime().toLocalTime().isBefore(endTime)) {
-                userForReturn.add(user);
-            }
-        }
-        return userForReturn;
+        return userMealWithExcessList;
     }
 
     public static List<UserMealWithExcess> filteredByStreams(List<UserMeal> meals, LocalTime startTime, LocalTime endTime, int caloriesPerDay) {
