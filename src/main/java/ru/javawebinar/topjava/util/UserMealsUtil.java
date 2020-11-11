@@ -30,31 +30,21 @@ public class UserMealsUtil {
 
     public static List<UserMealWithExcess> filteredByCycles(List<UserMeal> meals, LocalTime startTime, LocalTime endTime, int caloriesPerDay) {
         // TODO return filtered list with excess. Implement by cycles
+
         // дата и количество калорий за день
-        Map<LocalDate, Integer> contCalories = new HashMap<>();
         // добавить в Map по ключу даты по значению плюсуем калории
-        for (UserMeal userMeal : meals) {
-            if (contCalories.containsKey(userMeal.getDateTime().toLocalDate())) {
-                Integer count = userMeal.getCalories() + contCalories.get(userMeal.getDateTime().toLocalDate());
-                contCalories.put(userMeal.getDateTime().toLocalDate(), count);
-            } else {
-                contCalories.put(userMeal.getDateTime().toLocalDate(), userMeal.getCalories());
-            }
-        }
+        final Map<LocalDate, Integer> contCalories = new HashMap<>();
+        meals.forEach(meal -> contCalories.merge(meal.getDateTime().toLocalDate(), meal.getCalories(), Integer::sum));
+
         // вся еда между указанным временем с полем избытка
-        List<UserMealWithExcess> userMealWithExcessList = new ArrayList<>();
         // переформатируем UserMeal в UserMealWitchExcess, добавляем в лист userMealWithExcessList
-        for (Map.Entry<LocalDate, Integer> entry : contCalories.entrySet()) {
-            for (UserMeal meal : meals) {
-                if (entry.getKey().equals(meal.getDateTime().toLocalDate())
-                        && meal.getDateTime().toLocalTime().isAfter(startTime)
-                        && meal.getDateTime().toLocalTime().isBefore(endTime) ) {
-                    boolean excess = false;
-                    if (entry.getValue() > caloriesPerDay) excess = true;
-                    userMealWithExcessList.add(new UserMealWithExcess(meal.getDateTime(), meal.getDescription(), meal.getCalories(), excess));
-                }
+        final List<UserMealWithExcess> userMealWithExcessList = new ArrayList<>();
+        meals.forEach(meal -> {
+            if(meal.getDateTime().toLocalTime().isAfter(startTime) && meal.getDateTime().toLocalTime().isBefore(endTime)){
+                userMealWithExcessList.add(new UserMealWithExcess(meal.getDateTime(), meal.getDescription(), meal.getCalories(),
+                        contCalories.get(meal.getDateTime().toLocalDate()) > caloriesPerDay));
             }
-        }
+        });
         return userMealWithExcessList;
     }
 
